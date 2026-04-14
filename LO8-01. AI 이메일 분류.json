@@ -1,0 +1,153 @@
+{
+  "name": "LO8-01. AI 이메일 분류",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "56a05a26-884e-490b-8610-9f925113fb84",
+      "webhookId": "lo8-01-email-classify"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "당신은 이메일 분류 비서입니다.\n읽지 않은 이메일을 확인하고 다음 4개 카테고리로 분류하십시오:\n\n1. 긴급 — 제목이나 본문에 긴급, 즉시, ASAP 포함\n2. 고객문의 — 고객, 문의, 견적, 구매 관련\n3. 업무협조 — 보고서, 회의, 일정, 프로젝트 관련\n4. 뉴스레터 — 뉴스, 구독, newsletter, 홍보 관련\n\n각 이메일에 대해 분류 결과와 이유를 알려주십시오.\n분류 후 해당 라벨을 Gmail에 적용하십시오.",
+          "maxIterations": 5
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        288,
+        0
+      ],
+      "id": "c310c97f-6c86-4803-a718-cb05443b1254",
+      "notesInFlow": true,
+      "notes": "System Prompt에 4개 분류 기준이 정의되어 있습니다. 본인 업무에 맞게 카테고리를 수정하세요."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        160,
+        240
+      ],
+      "id": "698dc396-ac4c-4bb9-9e8f-7140865a3737",
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId }}"
+      },
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        240
+      ],
+      "id": "57908459-96e7-4977-8a75-91fe811c4936"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 10,
+        "filters": {}
+      },
+      "name": "Gmail Tool - 이메일 읽기",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        240
+      ],
+      "id": "eeb8718e-5b63-4f4b-8ff6-273f64cfeb41",
+      "notesInFlow": true,
+      "webhookId": "c734f7d4-783f-436d-a8c8-3d9ff36d0af1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "darMliC56SQN8QdB",
+          "name": "Gmail OAuth2 API"
+        }
+      },
+      "notes": "Gmail OAuth2 Credential을 선택하세요. Operation: Get Many (기본값). AI Agent가 이메일 목록을 조회합니다."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Tool - 이메일 읽기": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9bbc3a7d-e188-46e2-af7d-814546b1274d",
+  "meta": {
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "WMsZz9DDABIGFbGb",
+  "tags": []
+}

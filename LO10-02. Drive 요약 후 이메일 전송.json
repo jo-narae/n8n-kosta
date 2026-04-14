@@ -1,0 +1,297 @@
+{
+  "name": "LO10-02. Drive 요약 후 이메일 전송",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \"다음 문서를 3줄로 요약하고, 요약 결과를 반드시 Gmail Tool로 이메일 전송하십시오.\\n\\n\" + $json.text.join('\\n\\n') }}",
+        "options": {
+          "systemMessage": "당신은 문서 요약 및 이메일 전송 비서입니다.\n\n반드시 다음 순서로 실행하십시오:\n1. 전달받은 문서의 핵심 내용을 3줄로 요약합니다\n2. 문서 제목과 주요 키워드를 정리합니다\n3. Gmail Tool을 사용하여 요약 결과를 반드시 이메일로 전송합니다\n\n이메일 전송을 절대 건너뛰지 마십시오.\n한국어로 작성하십시오.",
+          "maxIterations": 5
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        2736,
+        400
+      ],
+      "id": "630d0548-4210-4ea9-934e-955a954dbca0",
+      "notesInFlow": true,
+      "notes": "문서를 요약하고 Gmail Tool로 이메일을 반드시 전송합니다."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        624
+      ],
+      "id": "6c5f9112-40ae-46af-a4e4-5bea00d3ef15",
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "=nare6004@gmail.com",
+        "subject": "pdf 요약본",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "name": "Gmail Tool - Send",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        2880,
+        624
+      ],
+      "id": "11769fe1-243d-40bf-8be3-9d41f749f5ef",
+      "notesInFlow": true,
+      "webhookId": "e19801ea-e901-491b-b56d-aae89dd775f6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "darMliC56SQN8QdB",
+          "name": "Gmail OAuth2 API"
+        }
+      },
+      "notes": "AI Agent가 요약 결과를 이메일로 전송합니다."
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "name contains 'kosta  edu'",
+        "limit": 1,
+        "filter": {},
+        "options": {}
+      },
+      "name": "Drive Search",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1616,
+        400
+      ],
+      "id": "b106af59-e235-4330-9b25-ac9cb8321819",
+      "notesInFlow": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xpjbitO3FeZBf3G1",
+          "name": "Google Drive OAuth2 API"
+        }
+      },
+      "notes": "Drive OAuth2 Credential을 선택하세요."
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{ $json.id }}",
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf",
+              "drawingsToFormat": "application/pdf",
+              "slidesToFormat": "application/pdf",
+              "sheetsToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "name": "Drive Download",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2064,
+        400
+      ],
+      "id": "074045f3-b611-43bf-a356-606dfb7f620a",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xpjbitO3FeZBf3G1",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        2288,
+        400
+      ],
+      "id": "a04f2b15-bd2d-44f7-86ef-d39f839e643c"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "={{ \"'\" + $json.id + \"' in parents\" }}",
+        "filter": {},
+        "options": {}
+      },
+      "name": "Drive - 폴더 안 파일 목록",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1840,
+        400
+      ],
+      "id": "88fc85ec-bf39-414a-82c9-6f1e5a73621d",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xpjbitO3FeZBf3G1",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2512,
+        400
+      ],
+      "id": "fa747b61-9408-4067-a00a-3fe7428dbb6e",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        400
+      ],
+      "id": "f6a30595-e8ff-43cd-9654-545a7e9aa84f",
+      "name": "When clicking 'Execute workflow'"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Tool - Send": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive Search": {
+      "main": [
+        [
+          {
+            "node": "Drive - 폴더 안 파일 목록",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive Download": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive - 폴더 안 파일 목록": {
+      "main": [
+        [
+          {
+            "node": "Drive Download",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Drive Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "75af293e-5ec8-48ce-a4f2-b0ce05d2596b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "r1R5Ej3feZUPicxg",
+  "tags": []
+}

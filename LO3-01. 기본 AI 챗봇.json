@@ -1,0 +1,95 @@
+{
+  "name": "LO3-01. 기본 AI 챗봇",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4e5d4d48-31b8-4730-a79f-542b4cfb84c8",
+      "webhookId": "lo3-01-chatbot"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "당신은 친절한 업무 도우미입니다.\n\n규칙:\n1. 사용자의 질문에 친절하게 답변하십시오\n2. 답변은 500자 이내로 간결하게 작성하십시오\n3. 모르는 내용은 솔직하게 모른다고 말하십시오\n4. 한국어로 답변하십시오"
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        288,
+        0
+      ],
+      "id": "c5903f8e-f987-4b72-97c2-3239ca2605df",
+      "notesInFlow": true,
+      "notes": "System Prompt에 역할, 규칙, 제약을 정의합니다. 프롬프트를 수정하여 AI의 응답 변화를 관찰하세요."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        288,
+        208
+      ],
+      "id": "298f909a-f1fd-4c40-a4f4-3473c1ad6207",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      },
+      "notes": "Credential에 강사 제공 API 키를 입력하세요"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a4ea61ef-90cd-4ca6-9ec8-fd9efb8fd9a9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "3MgQS81XFfuni3w3",
+  "tags": []
+}

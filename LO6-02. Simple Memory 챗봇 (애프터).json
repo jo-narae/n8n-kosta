@@ -1,0 +1,120 @@
+{
+  "name": "LO6-02. Simple Memory 챗봇 (애프터)",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0f81ddee-3c86-442c-82dd-ef693ee12b61",
+      "webhookId": "lo6-02-simple-memory"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "당신은 친절한 업무 도우미입니다.\n\n규칙:\n1. 사용자의 질문에 친절하게 답변하십시오\n2. 답변은 500자 이내로 간결하게 작성하십시오\n3. 모르는 내용은 솔직하게 모른다고 말하십시오\n4. 한국어로 답변하십시오\n5. 사용자가 이전에 말한 내용을 기억하고 맥락에 맞게 답변하십시오"
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        288,
+        0
+      ],
+      "id": "d09636e0-3cf4-45c1-b1d5-35416fb6f730",
+      "notesInFlow": true,
+      "notes": "Simple Memory가 연결되어 있습니다. 동일한 테스트를 해보세요: '안녕하세요, 저는 홍길동입니다' → '제 이름이 뭐라고 했습니까?' AI가 이름을 기억합니다."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        160,
+        240
+      ],
+      "id": "f8bdb687-760f-4dff-b322-f8bce21679bf",
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId }}"
+      },
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        240
+      ],
+      "id": "e9ffb569-8361-4cbd-b418-686986e31512",
+      "notesInFlow": true,
+      "notes": "Context Window Length: 5 (최근 5개 대화 쌍 기억). 디버깅 패널에서 Memory 조회/저장 흐름을 확인하세요."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "96386a67-e8d0-4bce-a6fb-5e95da3a9ff7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "54U6w0ZvlqBljC7u",
+  "tags": []
+}

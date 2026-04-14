@@ -1,0 +1,226 @@
+{
+  "name": "LO11-02. RAG 챗봇",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -208,
+        416
+      ],
+      "id": "3fe0c7b3-7cd0-47d3-aa6b-ff42afbf9471",
+      "webhookId": "lo11-02-rag-chatbot"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "당신은 회사 문서 검색 도우미입니다.\n\n규칙:\n1. 사용자 질문에 대해 반드시 company_docs 도구를 호출하여 문서를 검색한 후 답변하세요\n2. 문서에 없는 내용은 \"해당 내용은 저장된 문서에서 찾을 수 없습니다\"라고 답변하세요\n3. 답변할 때 어떤 문서에서 찾았는지 함께 알려주세요\n4. 한국어로 답변하세요"
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        48,
+        416
+      ],
+      "id": "7633e494-1fdf-4a7f-9643-3a77eaa0434a",
+      "notesInFlow": true,
+      "notes": "RAG 챗봇의 핵심입니다. System Prompt에서 문서 검색을 우선하도록 지시합니다."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model (Agent)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        16,
+        640
+      ],
+      "id": "e33addca-eebc-4fb1-bbae-e35b27338f97",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      },
+      "notes": "AI Agent가 사용하는 메인 LLM. 사용자와 대화하고 Tool 호출 여부를 판단합니다."
+    },
+    {
+      "parameters": {
+        "name": "company_docs",
+        "description": "회사 내부 문서를 검색합니다. 회사 정보, 규정, 프로젝트 관련 질문에 사용하세요.",
+        "topK": 3
+      },
+      "name": "Vector Store QA Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        144,
+        640
+      ],
+      "id": "19fa965b-ba4d-4fa2-9c55-48668c7748b9",
+      "notesInFlow": true,
+      "notes": "Pinecone에서 청크를 검색한 뒤 자체 LLM으로 답변을 요약합니다. Vector Store + Model 서브노드 둘 다 필요합니다."
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8nkosta",
+          "mode": "list",
+          "cachedResultName": "n8nkosta"
+        },
+        "options": {}
+      },
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        848
+      ],
+      "id": "f1741b7b-939e-43df-8b7b-f6d2dabbb5a3",
+      "notesInFlow": true,
+      "credentials": {
+        "pineconeApi": {
+          "id": "HQQFUcOen6asrlkR",
+          "name": "Pinecone account"
+        }
+      },
+      "notes": "파트 A에서 문서를 저장한 동일한 n8nkosta 인덱스. Retrieve 모드."
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "OpenAI Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        128,
+        1056
+      ],
+      "id": "e51a2259-e311-482d-a6b2-5bf8263fbe4d",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      },
+      "notes": "저장할 때와 동일한 모델(text-embedding-3-small, 1536차원)을 사용해야 합니다."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model (QA Tool)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        336,
+        848
+      ],
+      "id": "8568553f-50d1-4419-89a7-36dc2483068a",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      },
+      "notes": "Vector Store QA Tool이 검색된 청크를 요약할 때 사용하는 LLM. 이 연결이 없으면 에러가 발생합니다."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model (Agent)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store QA Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store QA Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model (QA Tool)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Vector Store QA Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "10e91f38-ee11-40bd-8de4-b950c6a6c015",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "8vFnWCtLYKAK7J2J",
+  "tags": []
+}

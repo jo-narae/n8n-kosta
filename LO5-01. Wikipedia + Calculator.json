@@ -1,0 +1,138 @@
+{
+  "name": "LO5-01. Wikipedia + Calculator",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -272,
+        -48
+      ],
+      "id": "29c77c64-4d85-425c-aadc-b086a7cba0f8",
+      "webhookId": "lo5-01-wikipedia"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "당신은 지식 검색 도우미입니다.\n\n규칙:\n1. 개념이나 용어에 대한 질문은 Wikipedia로 검색하십시오\n2. 숫자 계산이 필요한 질문은 Calculator를 사용하십시오\n3. 일반 대화에는 도구를 사용하지 마십시오\n4. 같은 도구를 반복 호출하지 마십시오\n5. 한국어로 답변하십시오\n6. 500자 이내로 답변하십시오",
+          "maxIterations": 3
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        16,
+        -48
+      ],
+      "id": "e69de043-7acb-47b1-926d-7dc1faea0251",
+      "notesInFlow": true,
+      "notes": "Wikipedia와 Calculator 두 Tool이 연결되어 있습니다. 질문에 따라 AI가 어떤 Tool을 선택하는지 Executions에서 확인하세요."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        192
+      ],
+      "id": "bdad873a-41f3-42f9-aaa4-5e028710d24a",
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "name": "Wikipedia",
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        48,
+        192
+      ],
+      "id": "eadd341b-dda7-4335-9950-617d5ec433e3"
+    },
+    {
+      "parameters": {},
+      "name": "Calculator",
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        208,
+        192
+      ],
+      "id": "dea83323-874c-4006-a4b9-21eeba2bb278"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b4de2d5c-7dfb-4b1c-865b-ce28bf5e556f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "2VRWqBR7CmKyaw7O",
+  "tags": []
+}

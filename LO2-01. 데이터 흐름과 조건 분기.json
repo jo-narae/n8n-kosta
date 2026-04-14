@@ -1,0 +1,241 @@
+{
+  "name": "LO2-01. 데이터 흐름과 조건 분기",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        112
+      ],
+      "id": "5f1e6de7-f86f-43e7-b1cf-7933a0efcebb"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3k7z9loWXXZhYw63",
+          "mode": "list",
+          "cachedResultName": "업무 요청 목록",
+          "cachedResultUrl": "/projects/3cutluVJ8Y2AVRmm/datatables/3k7z9loWXXZhYw63"
+        }
+      },
+      "name": "Data Table (읽기)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        112
+      ],
+      "id": "f2d18ea4-5e58-4b21-a5eb-99eaab1ab43c",
+      "notesInFlow": true,
+      "notes": "사전에 '업무요청' Data Table을 생성하고 4건의 데이터를 입력해 두세요"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond1",
+              "leftValue": "={{ $json.urgent }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "IF (긴급 여부)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        112
+      ],
+      "id": "e7826417-76b6-4ec9-8cb7-c156d44817d5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "030e9e9b-f382-4cee-9612-af8add432ecf",
+              "name": "이름",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "6c77bc3c-36f1-4a0a-a8ab-6ca43fb1b5da",
+              "name": "부서",
+              "value": "={{ $json.depth }}",
+              "type": "string"
+            },
+            {
+              "id": "e03e384d-f524-4292-8e7c-fccbecbe238e",
+              "name": "요청 사항",
+              "value": "={{ $json.request }}",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "상태",
+              "value": "긴급 처리",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set (긴급)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ec0524e3-e627-4018-9088-6bf5e9c5974a"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "284922fd-6777-4b83-944d-28012d87bae4",
+              "name": "이름",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "50fd71e6-7eb5-4c13-96c6-e59e257f4d45",
+              "name": "부서",
+              "value": "={{ $json.depth }}",
+              "type": "string"
+            },
+            {
+              "id": "12764d84-97d1-4590-86ba-8d2d532fbc50",
+              "name": "요청 사항",
+              "value": "={{ $json.request }}",
+              "type": "string"
+            },
+            {
+              "id": "f2",
+              "name": "상태",
+              "value": "일반 처리",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set (일반)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        224
+      ],
+      "id": "87cfb381-5607-429f-bd06-97b2619170a1"
+    },
+    {
+      "parameters": {},
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        240,
+        112
+      ],
+      "id": "5cd848bf-34a9-40d6-84df-bd9afaade655"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Data Table (읽기)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Table (읽기)": {
+      "main": [
+        [
+          {
+            "node": "IF (긴급 여부)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF (긴급 여부)": {
+      "main": [
+        [
+          {
+            "node": "Set (긴급)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set (일반)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set (긴급)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set (일반)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2159f738-b2ce-4973-9165-9a6bbed176cc",
+  "meta": {
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "KThzgjVkkOCIUbVn",
+  "tags": []
+}

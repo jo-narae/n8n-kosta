@@ -1,0 +1,114 @@
+{
+  "name": "LO2-02. 표현식(Expression) 실습",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "885d0445-53cd-43bc-8634-5260e090ac23"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3k7z9loWXXZhYw63",
+          "mode": "list",
+          "cachedResultName": "업무 요청 목록",
+          "cachedResultUrl": "/projects/3cutluVJ8Y2AVRmm/datatables/3k7z9loWXXZhYw63"
+        },
+        "filters": {
+          "conditions": []
+        }
+      },
+      "name": "Data Table (읽기)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "c4ad10d3-3fcc-4fcf-98ef-528528030625",
+      "notesInFlow": true,
+      "notes": "'업무요청' Data Table을 선택하세요"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "요약",
+              "value": "={{ $json.name }} {{ $json.depth }} - {{ $json.request }}",
+              "type": "string"
+            },
+            {
+              "id": "f2",
+              "name": "우선순위",
+              "value": "={{ $json['urgent'] === true ? '높음' : '보통' }}",
+              "type": "string"
+            },
+            {
+              "id": "f3",
+              "name": "처리일",
+              "value": "={{ $now.format('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set (표현식 실습)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        0
+      ],
+      "id": "da11c488-00df-44b6-923a-cc77305140b5",
+      "notesInFlow": true,
+      "notes": "3가지 표현식 패턴:\n1. 필드 결합: {{ $json['이름'] }} ({{ $json['부서'] }})\n2. 조건부 값: {{ $json['긴급'] === true ? '높음' : '보통' }}\n3. 날짜 함수: {{ $now.format('yyyy-MM-dd') }}"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Data Table (읽기)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Table (읽기)": {
+      "main": [
+        [
+          {
+            "node": "Set (표현식 실습)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d8a5f089-7184-484c-b3fa-e0cbd58d4480",
+  "meta": {
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "JbAVuWb53f10Kphr",
+  "tags": []
+}

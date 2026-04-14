@@ -1,0 +1,212 @@
+{
+  "name": "LO2-03. Loop 반복 처리 실습",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        112
+      ],
+      "id": "69ac21dc-54fb-4c26-8414-336a86581faa"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3k7z9loWXXZhYw63",
+          "mode": "list",
+          "cachedResultName": "업무 요청 목록",
+          "cachedResultUrl": "/projects/3cutluVJ8Y2AVRmm/datatables/3k7z9loWXXZhYw63"
+        }
+      },
+      "name": "Data Table (읽기)1",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        112
+      ],
+      "id": "f10a7eec-ac2b-4183-a297-2d5d7981eb92",
+      "notesInFlow": true,
+      "notes": "'업무요청' Data Table을 선택하세요"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Loop Over Items1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -240,
+        112
+      ],
+      "id": "c8c6f994-62a0-4bc5-b5f8-22c17fd511c9",
+      "notesInFlow": true,
+      "notes": "Batch Size 1: 아이템을 한 건씩 처리합니다. Output 탭에서 반복 횟수를 확인하세요."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "처리결과",
+              "value": "={{ $json.name }}님의 {{ $json.request }} 건이 접수되었습니다",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "name": "Set (건별 처리)1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        112
+      ],
+      "id": "e04a9b79-2ba6-4177-8927-0c992a3ec8ef"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "xEnXJFYUp4NUGCnv",
+          "mode": "list",
+          "cachedResultName": "업무 처리 결과 목록",
+          "cachedResultUrl": "/projects/3cutluVJ8Y2AVRmm/datatables/xEnXJFYUp4NUGCnv"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.name }}",
+            "depth": "={{ $json.depth }}",
+            "result": "={{ $json['처리결과'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "depth",
+              "displayName": "depth",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "result",
+              "displayName": "result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "name": "Data Table (저장)1",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        224,
+        112
+      ],
+      "id": "32e5cbd6-ab83-48ca-9c5a-434fc7c764ed",
+      "notesInFlow": true,
+      "notes": "(선택) '처리이력' Data Table을 새로 만들어 결과를 저장해 보세요"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Data Table (읽기)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Table (읽기)1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Set (건별 처리)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set (건별 처리)1": {
+      "main": [
+        [
+          {
+            "node": "Data Table (저장)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Table (저장)1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d8a4ebd9-05f7-488e-8a9f-55e6bf467bcb",
+  "meta": {
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "cUU8HhzBvOQDX3iI",
+  "tags": []
+}

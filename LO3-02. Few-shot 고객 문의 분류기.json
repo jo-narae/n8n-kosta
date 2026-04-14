@@ -1,0 +1,95 @@
+{
+  "name": "LO3-02. Few-shot 고객 문의 분류기",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        -64
+      ],
+      "id": "19a327d0-b225-47c8-a34f-428629cc0318",
+      "webhookId": "lo3-02-fewshot"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "당신은 고객 문의를 분류하는 AI입니다.\n\n아래 예시를 참고하여 사용자의 문의를 분류하십시오.\n\n[예시]\n입력: \"배송이 언제 오나요?\"\n분류: 배송문의\n우선순위: 보통\n\n입력: \"환불하고 싶습니다\"\n분류: 환불요청\n우선순위: 높음\n\n입력: \"상품이 파손되었습니다\"\n분류: 품질불만\n우선순위: 긴급\n\n입력: \"다른 색상도 있나요?\"\n분류: 상품문의\n우선순위: 보통\n\n[출력 형식]\n분류: {카테고리}\n우선순위: {보통/높음/긴급}\n요약: {한 줄 요약}\n추천 대응: {구체적 안내}"
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1056,
+        -64
+      ],
+      "id": "f1175146-3e1f-4783-9028-949e6a4995a7",
+      "notesInFlow": true,
+      "notes": "Few-shot 프롬프트: 예시 4개로 분류 기준과 출력 형식을 학습시킵니다. 예시를 추가/수정하여 정확도 변화를 관찰하세요."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        144
+      ],
+      "id": "9c2aadc3-f808-44e7-a60e-865fee5a8fe8",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      },
+      "notes": "Credential에 강사 제공 API 키를 입력하세요"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b97f4469-3302-4420-bc69-6fd06a446722",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "RM1njg9s8fqEQf8W",
+  "tags": []
+}

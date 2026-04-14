@@ -1,0 +1,93 @@
+{
+  "name": "LO6-01. Memory 없는 챗봇 (비포)",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "78f896b6-0bee-48f2-af77-652840c3592b",
+      "webhookId": "lo6-01-no-memory"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "당신은 친절한 업무 도우미입니다.\n\n규칙:\n1. 사용자의 질문에 친절하게 답변하십시오\n2. 답변은 500자 이내로 간결하게 작성하십시오\n3. 모르는 내용은 솔직하게 모른다고 말하십시오\n4. 한국어로 답변하십시오"
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        288,
+        0
+      ],
+      "id": "c9c8919f-0820-4dea-8b91-4c8eab3d6d51",
+      "notesInFlow": true,
+      "notes": "Memory가 연결되어 있지 않습니다. '안녕하세요, 저는 홍길동입니다' → '제 이름이 뭐라고 했습니까?' 순서로 테스트하세요. AI가 이름을 기억하지 못합니다."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        288,
+        208
+      ],
+      "id": "96cabd54-8a79-4e67-871f-4d16fed8f32c",
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b4ed429d-facd-45b7-a71b-8003bfa6c307",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "oVwUkOPnXbE6HNki",
+  "tags": []
+}

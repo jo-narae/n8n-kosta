@@ -1,0 +1,128 @@
+{
+  "name": "LO4-01. RSS 수집 기초",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://www.44bits.io/ko/feed/all"
+      },
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b15ad386-bb4f-4f6f-a7d1-e74fb9c63d7f",
+      "notesInFlow": true,
+      "notes": "44bits 기술 블로그 RSS를 수집합니다. 업데이트 주기가 길어 실시간 감지는 어렵지만, Test Workflow로 기존 글을 가져와 Data Table에 저장하는 흐름을 확인할 수 있습니다."
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "BxU6Vw3pDImyFUmR",
+          "mode": "list",
+          "cachedResultName": "뉴스 목록",
+          "cachedResultUrl": "/projects/3cutluVJ8Y2AVRmm/datatables/BxU6Vw3pDImyFUmR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "link": "={{ $json.link }}",
+            "content": "={{ $json.content }}",
+            "pubDate": "={{ $json.pubDate }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "link",
+              "displayName": "link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pubDate",
+              "displayName": "pubDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "name": "Data Table (저장)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        288,
+        0
+      ],
+      "id": "e784a853-5d34-40f5-8ec2-1703f40a3309",
+      "notesInFlow": true,
+      "notes": "Data Table 드롭다운에서 'News' 테이블을 선택하세요. 사전에 News 테이블을 생성해야 합니다."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Data Table (저장)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "09729e28-d480-479e-a7ec-3787ee04a5cd",
+  "meta": {
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "bC09JJx1n5fbQXGO",
+  "tags": []
+}

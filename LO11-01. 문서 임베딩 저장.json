@@ -1,0 +1,303 @@
+{
+  "name": "LO11-01. 문서 임베딩 저장",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        320,
+        -16
+      ],
+      "id": "39851b0f-9af1-49bc-8215-533869e03b9f",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "name contains 'kosta  edu'",
+        "limit": 1,
+        "filter": {},
+        "options": {}
+      },
+      "name": "Drive Search",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        544,
+        -16
+      ],
+      "id": "4b2d1321-1cbf-4ffc-9632-da29819396d5",
+      "notesInFlow": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xpjbitO3FeZBf3G1",
+          "name": "Google Drive OAuth2 API"
+        }
+      },
+      "notes": "Drive OAuth2 Credential을 선택하세요. Advanced Search로 폴더를 검색합니다. 폴더명은 본인 Drive에 맞게 수정하세요."
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "={{ \"'\" + $json.id + \"' in parents\" }}",
+        "filter": {},
+        "options": {}
+      },
+      "name": "Drive - 폴더 안 파일 목록",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        768,
+        -16
+      ],
+      "id": "e23ae078-a56a-43b8-8234-4fa34d439c82",
+      "notesInFlow": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xpjbitO3FeZBf3G1",
+          "name": "Google Drive OAuth2 API"
+        }
+      },
+      "notes": "앞 노드에서 찾은 폴더의 ID를 받아서 폴더 안의 파일 목록을 가져옵니다."
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{ $json.id }}",
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf",
+              "drawingsToFormat": "application/pdf",
+              "slidesToFormat": "application/pdf",
+              "sheetsToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "name": "Drive Download",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        992,
+        -16
+      ],
+      "id": "787b5b39-b2e6-4795-9aec-5c3183621dfb",
+      "notesInFlow": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xpjbitO3FeZBf3G1",
+          "name": "Google Drive OAuth2 API"
+        }
+      },
+      "notes": "검색된 파일을 다운로드합니다. Google File Conversion으로 PDF로 변환합니다."
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        -16
+      ],
+      "id": "dcbce841-2b61-4b3a-b780-8b468f80b313",
+      "notesInFlow": true,
+      "notes": "다운로드된 PDF에서 텍스트를 추출합니다. Operation: PDF. 출력의 $json.text에 본문이 들어있습니다."
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8nkosta",
+          "mode": "list",
+          "cachedResultName": "n8nkosta"
+        },
+        "options": {}
+      },
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        -16
+      ],
+      "id": "7f13d116-f6de-40a3-aa95-ad916509e080",
+      "notesInFlow": true,
+      "credentials": {
+        "pineconeApi": {
+          "id": "HQQFUcOen6asrlkR",
+          "name": "Pinecone account"
+        }
+      },
+      "notes": "Insert Documents 모드. Data Loader가 text 필드만 뽑아서 임베딩합니다."
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.text }}",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1568,
+        208
+      ],
+      "id": "cefc091d-2846-402f-ac1f-839ff8f51980",
+      "name": "Default Data Loader",
+      "notesInFlow": true,
+      "notes": "JSON 모드 + Load Specific Data로 $json.text만 문서로 사용합니다. 이렇게 해야 PDF 메타데이터(버전, 작성자 등)가 임베딩되지 않습니다."
+    },
+    {
+      "parameters": {
+        "chunkSize": 200,
+        "chunkOverlap": 50,
+        "options": {}
+      },
+      "name": "Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        416
+      ],
+      "id": "3be19815-c2ac-436f-a706-6f308f45bb3c",
+      "notesInFlow": true,
+      "notes": "Chunk Size 200, Overlap 50. PDF 노이즈 조각이 독립 청크로 저장되지 않도록 충분히 큰 크기를 씁니다."
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small",
+        "options": {}
+      },
+      "name": "OpenAI Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        208
+      ],
+      "id": "ed060836-286d-4cd3-8498-e5f56dd0e8fc",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      },
+      "notes": "text-embedding-3-small (1536차원). Pinecone 인덱스 차원과 일치해야 합니다."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Drive Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive Search": {
+      "main": [
+        [
+          {
+            "node": "Drive - 폴더 안 파일 목록",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive - 폴더 안 파일 목록": {
+      "main": [
+        [
+          {
+            "node": "Drive Download",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive Download": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "52346e83-f645-4a67-97f8-9aae09fa4a18",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "NQdDTQHtJxH2lR0L",
+  "tags": []
+}

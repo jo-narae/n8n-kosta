@@ -1,0 +1,269 @@
+{
+  "name": "LO10-01. Drive 문서 검색기",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        816,
+        272
+      ],
+      "id": "c39297d8-8d46-4ddc-9a97-738eb9a721a7",
+      "webhookId": "lo10-01-drive-summary"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "name contains 'kosta  edu'",
+        "limit": 1,
+        "filter": {},
+        "options": {}
+      },
+      "name": "Drive Search",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1040,
+        272
+      ],
+      "id": "03eb8b01-aeea-4832-9596-07e457469ce4",
+      "notesInFlow": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xpjbitO3FeZBf3G1",
+          "name": "Google Drive OAuth2 API"
+        }
+      },
+      "notes": "Drive OAuth2 Credential을 선택하세요. Advanced Search로 폴더를 검색합니다. 폴더명은 본인 Drive에 맞게 수정하세요."
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{ $json.id }}",
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf",
+              "drawingsToFormat": "application/pdf",
+              "slidesToFormat": "application/pdf",
+              "sheetsToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "name": "Drive Download",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1488,
+        272
+      ],
+      "id": "c22e5e3a-c98a-4bf3-8651-ee9e5afa5cb4",
+      "notesInFlow": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xpjbitO3FeZBf3G1",
+          "name": "Google Drive OAuth2 API"
+        }
+      },
+      "notes": "검색된 파일을 다운로드합니다. Google File Conversion으로 PDF로 변환합니다."
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        272
+      ],
+      "id": "c74f2274-8b38-47c5-b203-c3f3dc8cd44c",
+      "notesInFlow": true,
+      "notes": "다운로드된 PDF에서 텍스트를 추출합니다. Operation: PDF."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \"사용자 질문: \" + $('Chat Trigger').first().json.chatInput + \"\\n\\n참고 문서:\\n\" + $json.text.join('\\n\\n') }}",
+        "options": {
+          "systemMessage": "당신은 문서 기반 질의응답 비서입니다.\n\n전달받은 Google Drive 문서를 참고하여 사용자의 질문에 답변하십시오.\n\n규칙:\n1. 사용자의 질문과 관련된 내용만 문서에서 찾아 답변하십시오\n2. 문서에 없는 내용은 \"전달받은 문서에 해당 내용이 없습니다\"라고 답변하십시오\n3. 답변 시 어떤 문서에서 찾았는지 함께 알려주십시오\n4. 한국어로 답변하십시오"
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        2160,
+        272
+      ],
+      "id": "4018e406-ae8d-4934-9230-86cce77c39b4",
+      "notesInFlow": true,
+      "notes": "사용자 질문과 문서 내용을 함께 전달받아, 질문에 관련된 내용만 찾아 답변합니다."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        2128,
+        496
+      ],
+      "id": "ee0516f2-dfb0-4264-8c4a-5273b391a7d2",
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "={{ \"'\" + $json.id + \"' in parents\" }}",
+        "filter": {},
+        "options": {}
+      },
+      "name": "Drive - 폴더 안 파일 목록",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1264,
+        272
+      ],
+      "id": "60dbf515-dccb-44ed-b681-5a8248a2f6d2",
+      "notesInFlow": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xpjbitO3FeZBf3G1",
+          "name": "Google Drive OAuth2 API"
+        }
+      },
+      "notes": "앞 노드에서 찾은 폴더의 ID를 받아서 폴더 안의 파일 목록을 가져옵니다."
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1936,
+        272
+      ],
+      "id": "eb400b11-1487-4566-a2b9-f82204923007",
+      "name": "Aggregate"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Drive Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive Search": {
+      "main": [
+        [
+          {
+            "node": "Drive - 폴더 안 파일 목록",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive Download": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive - 폴더 안 파일 목록": {
+      "main": [
+        [
+          {
+            "node": "Drive Download",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "887e518c-2b93-4033-bb7f-a90ce2135c77",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "VY0lwwO48Lj07goQ",
+  "tags": []
+}

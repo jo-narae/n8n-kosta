@@ -1,0 +1,157 @@
+{
+  "name": "LO4-03. 뉴스 수집 후 검색",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ee3c87ca-e2cf-4137-8763-272e9ecdb75e",
+      "name": "When chat message received",
+      "webhookId": "lo4-02-rss-full"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "BxU6Vw3pDImyFUmR",
+          "mode": "list",
+          "cachedResultName": "뉴스 목록",
+          "cachedResultUrl": "/projects/3cutluVJ8Y2AVRmm/datatables/BxU6Vw3pDImyFUmR"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "title",
+              "condition": "ilike",
+              "keyValue": "={{ $json.chatInput }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        0
+      ],
+      "id": "ad06db8a-1e3c-4dd5-a1a4-9a208912a087",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        464,
+        0
+      ],
+      "id": "3b9eeb75-6ad1-4554-94e5-e9505c920d71",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=사용자가 검색한 키워드 : {{ $('When chat message received').item.json.chatInput }}\n검색한 뉴스 결과 : {{ $json.toJsonString() }}",
+        "options": {
+          "systemMessage": "당신은 뉴스 검색 도우미입니다.\n\n규칙:\n1. 사용자가 키워드를 검색하면 뉴스 검색 결과를 바탕으로 해당 키워드의 내용을 설명하십시오\n2. 각 뉴스의 제목, 핵심 내용, 원문 링크를 포함하십시오\n3. 500자 이내로 답변하십시오\n4. 검색된 뉴스 기사가 없다면 \"해당 키워드의 뉴스가 없습니다\"라고 안내하십시오\n5. 한국어로 답변하십시오"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        688,
+        0
+      ],
+      "id": "c7887295-590e-46c9-a23f-dc1fe156e1a7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        688,
+        240
+      ],
+      "id": "ee1e92e9-6b03-4025-80e0-ee432c5018f8",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "02f9205a-d982-4381-b18f-2d4bef1739a7",
+  "meta": {
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "lkMplXA4Xr2tpjYa",
+  "tags": []
+}

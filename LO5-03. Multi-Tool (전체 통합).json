@@ -1,0 +1,216 @@
+{
+  "name": "LO5-03. Multi-Tool (전체 통합)",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        160
+      ],
+      "id": "97e6884a-e0f8-479e-ba94-d7bff9d3d2a2",
+      "webhookId": "lo5-03-multi-tool"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "당신은 만능 업무 도우미입니다.\n\n도구 사용 규칙:\n1. 개념이나 용어 질문은 Wikipedia로 검색하십시오\n2. 숫자 계산이 필요하면 Calculator를 사용하십시오\n3. 실시간 정보나 최신 뉴스는 SerpAPI로 검색하십시오\n4. 저장된 뉴스 검색은 뉴스DB를 사용하십시오\n5. 일반 대화에는 도구를 사용하지 마십시오\n6. 같은 도구를 반복 호출하지 마십시오\n7. 한국어로 답변하십시오\n8. 500자 이내로 답변하십시오",
+          "maxIterations": 5
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        64,
+        160
+      ],
+      "id": "d34174ad-4613-4b40-adc6-efce332140a6",
+      "notesInFlow": true,
+      "notes": "4개 Tool이 모두 연결되어 있습니다. 다양한 질문으로 AI가 어떤 Tool을 선택하는지 테스트하세요.\n\n테스트 시나리오:\n1. \"도커란?\" → Wikipedia\n2. \"1500의 15% 할인?\" → Calculator\n3. \"최신 AI 뉴스\" → SerpAPI\n4. \"저장된 뉴스 중 docker\" → 뉴스DB\n5. \"안녕하세요\" → Tool 미사용"
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        448
+      ],
+      "id": "0bbec7a0-1df0-421c-94ca-38b440acc990",
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "name": "Wikipedia",
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        16,
+        448
+      ],
+      "id": "3250cc29-ae4c-4335-8238-603d0fd35d53"
+    },
+    {
+      "parameters": {},
+      "name": "Calculator",
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        144,
+        448
+      ],
+      "id": "d93d553f-7700-4f15-87a4-fcf9d4107a0e"
+    },
+    {
+      "parameters": {
+        "options": {
+          "gl": "kr",
+          "hl": "ko"
+        }
+      },
+      "name": "SerpAPI",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        272,
+        448
+      ],
+      "id": "2e1d6d6d-e2da-465c-a8ae-671c78af2aa0",
+      "credentials": {
+        "serpApi": {
+          "id": "VRbx3JD1ClLvUGd8",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "BxU6Vw3pDImyFUmR",
+          "mode": "list",
+          "cachedResultName": "뉴스 목록",
+          "cachedResultUrl": "/projects/3cutluVJ8Y2AVRmm/datatables/BxU6Vw3pDImyFUmR"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "title",
+              "condition": "ilike",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('title_keyword', ``, 'string') }}"
+            },
+            {
+              "keyName": "content",
+              "condition": "ilike",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('content_keyword', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "name": "뉴스DB",
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        448
+      ],
+      "id": "a45f571b-8e42-4488-8bd5-51d1ef996f81"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "뉴스DB": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "820477de-7de3-4080-9626-e78d89dde56a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "zknXoCjOhECUPeZo",
+  "tags": []
+}

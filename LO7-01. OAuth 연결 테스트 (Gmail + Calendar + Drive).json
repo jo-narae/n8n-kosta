@@ -1,0 +1,165 @@
+{
+  "name": "LO7-01. OAuth 연결 테스트 (Gmail + Calendar + Drive)",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        160
+      ],
+      "id": "72330d13-2d19-44cd-954c-f73b8be92bd1"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "filters": {}
+      },
+      "name": "Gmail - 최근 메일 1건",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9767ee6b-ea12-4cf3-9bcc-6fa4a6ce1950",
+      "notesInFlow": true,
+      "webhookId": "76228cbd-7afa-4dd6-aa61-03e49419bbbf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "darMliC56SQN8QdB",
+          "name": "Gmail OAuth2 API"
+        }
+      },
+      "notes": "Gmail OAuth2 Credential을 선택하세요. 실행 후 Output에서 발신자, 제목, 날짜가 표시되면 연결 성공입니다."
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": "primary",
+        "limit": 1,
+        "options": {
+          "timeMin": "={{ $now.toISO() }}",
+          "timeMax": "={{ $now.plus({ days: 7 }).toISO() }}"
+        }
+      },
+      "name": "Calendar - 이번 주 일정 1건",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        160
+      ],
+      "id": "ad7808cf-3103-4848-b388-7c44f86f896d",
+      "notesInFlow": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "27YkeJS0Q4v9PU99",
+          "name": "Google Calendar OAuth2 API"
+        }
+      },
+      "notes": "Google Calendar OAuth2 Credential을 선택하세요. 일정이 없으면 빈 배열이 반환되며, 이것도 정상입니다."
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "name contains 'kosta  edu'",
+        "limit": 1,
+        "filter": {},
+        "options": {}
+      },
+      "name": "Drive - 폴더 검색",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        0,
+        320
+      ],
+      "id": "3f87e0b4-b55a-4e95-b5f1-6d9e439b56df",
+      "notesInFlow": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xpjbitO3FeZBf3G1",
+          "name": "Google Drive OAuth2 API"
+        }
+      },
+      "notes": "Drive OAuth2 Credential을 선택하세요. Search Method: Advanced Search로 폴더를 찾습니다. 폴더명은 본인 Drive에 맞게 수정하세요."
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "={{ \"'\" + $json.id + \"' in parents\" }}",
+        "filter": {},
+        "options": {}
+      },
+      "name": "Drive - 폴더 안 파일 목록",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        272,
+        320
+      ],
+      "id": "79b75741-71d5-48d0-8cb1-fc3c9fc61545",
+      "notesInFlow": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xpjbitO3FeZBf3G1",
+          "name": "Google Drive OAuth2 API"
+        }
+      },
+      "notes": "앞 노드에서 찾은 폴더의 ID를 받아서 폴더 안의 파일 목록을 가져옵니다. Output에서 파일명과 ID가 표시되면 연결 성공입니다."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail - 최근 메일 1건",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Calendar - 이번 주 일정 1건",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Drive - 폴더 검색",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive - 폴더 검색": {
+      "main": [
+        [
+          {
+            "node": "Drive - 폴더 안 파일 목록",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bbdb93fb-1900-49d6-bc0e-ef153f5aebeb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "bHR1UQ9iQnAl0oIX",
+  "tags": []
+}

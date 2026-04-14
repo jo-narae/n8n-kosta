@@ -1,0 +1,129 @@
+{
+  "name": "LO5-02. SerpAPI 웹 검색",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -352,
+        -272
+      ],
+      "id": "346463d6-20ea-4d57-adad-2e741254c911",
+      "webhookId": "lo5-02-serpapi"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "당신은 정확한 팩트 기반의 뉴스 큐레이터입니다.\n\n규칙:\n1. SerpAPI로 실시간 웹 검색을 1회만 수행하십시오\n2. 검색 결과에서 뉴스 3개를 추출하여 제목, 요약, 링크를 제공하십시오\n3. 도구 응답에 없는 내용은 포함하지 마십시오\n4. 같은 도구를 반복 호출하지 마십시오\n5. 한국어로 답변하십시오\n6. 500자 이내로 답변하십시오",
+          "maxIterations": 3
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -80,
+        -272
+      ],
+      "id": "d91e40ec-4086-4ae4-871b-e7b621f90d6a",
+      "notesInFlow": true,
+      "notes": "SerpAPI로 실시간 웹 검색을 수행합니다. Credential에 SerpAPI Key를 입력하세요."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -32
+      ],
+      "id": "148686f3-af0d-484e-a903-f2f4a0df3c6e",
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "gl": "kr",
+          "hl": "ko"
+        }
+      },
+      "name": "SerpAPI",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        -32
+      ],
+      "id": "b60f01f0-9bc2-4169-990a-e7543b50d4f4",
+      "notesInFlow": true,
+      "credentials": {
+        "serpApi": {
+          "id": "VRbx3JD1ClLvUGd8",
+          "name": "SerpAPI account"
+        }
+      },
+      "notes": "Credential에 SerpAPI Key를 입력하세요. 무료 월 100회 검색 가능합니다."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d715e024-c224-42f4-98c8-fc8964c728d2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "o1uLFo8m1ALCyow6",
+  "tags": []
+}

@@ -1,0 +1,134 @@
+{
+  "name": "LO9-02. Discord 영어 튜터 봇",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "discord-english-tutor",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -224,
+        48
+      ],
+      "id": "74f30d9d-f799-4c09-9313-043160a07ef3",
+      "webhookId": "lo9-02-discord-bot",
+      "notesInFlow": true,
+      "notes": "n8n trigger 디스코드 앱이 메시지를 POST로 전달합니다. Production URL을 Discord /setup에 입력하세요."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.content.text }}",
+        "options": {
+          "systemMessage": "당신은 영어 회화 튜터입니다.\n\n사용자가 한국어로 메시지를 보내면 다음 형식으로 답변하십시오:\n\n1. 영어 번역: 사용자의 한국어를 자연스러운 영어로 번역합니다\n2. 발음 가이드: 핵심 표현의 한글 발음을 제공합니다\n3. 한 줄 팁: 원어민이 자주 쓰는 대체 표현이나 뉘앙스를 알려줍니다\n\n디스코드 호환 되도록 출력을 조정하고 글자수는 1000자 미만으로 하십시오.\n\n예시:\n사용자: 오늘 회의 몇 시에 시작해?\n\n**영어 번역:** What time does the meeting start today?\n**발음 가이드:** 왓 타임 더즈 더 미팅 스타트 투데이?\n**한 줄 팁:** 격식체로는 'Could you tell me what time the meeting begins?' 도 좋습니다."
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        64,
+        48
+      ],
+      "id": "89cb6c50-799e-4bd1-856d-a57820385c57",
+      "notesInFlow": true,
+      "notes": "Discord에서 받은 한국어를 영어로 번역하고 학습 콘텐츠를 제공합니다."
+    },
+    {
+      "parameters": {
+        "model": "gpt-5-nano",
+        "options": {}
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        64,
+        288
+      ],
+      "id": "31a5ce85-7eaf-42b1-834d-ec86267ae70f",
+      "credentials": {
+        "openAiApi": {
+          "id": "WMxpnENYsEXeum9c",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "={{ $json.output }}",
+        "options": {}
+      },
+      "name": "Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        464,
+        48
+      ],
+      "id": "1b0ac53a-ccec-4307-a13a-97c5588a259e",
+      "notesInFlow": true,
+      "webhookId": "ff3ba574-84af-4f6d-9bdb-da329d393be6",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "4zSQuNVImpnaT6bU",
+          "name": "Discord Webhook account"
+        }
+      },
+      "notes": "Discord 채널에서 생성한 Webhook URL을 Credential에 입력하세요. AI 응답이 같은 채널에 전송됩니다."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1b5c67dd-57b2-4ee0-9dc5-568404b79e8c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77731a0798d26be9eb89dbe8372e4ac846e123b7cff2f6139c558fb0f8dff292"
+  },
+  "id": "fCb6E9Zh8y1ieZhh",
+  "tags": []
+}
